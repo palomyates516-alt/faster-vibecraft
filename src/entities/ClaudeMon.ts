@@ -18,6 +18,7 @@ import {
   STATION_ANIMATIONS,
   type CharacterParts,
 } from './animations'
+import { loadPerformanceConfig } from '../config/PerformanceConfig'
 
 // Re-export for backwards compatibility
 export type ClaudeState = CharacterState
@@ -44,6 +45,11 @@ export class Claude implements ICharacter {
   private workTime = 0
   private thinkTime = 0
   private updateCallback: ((delta: number) => void) | null = null
+
+  // Performance optimization: throttle idle animation updates
+  private lastUpdateTime = 0
+  private readonly IDLE_UPDATE_INTERVAL = 100  // ms - update idle animation 10x per second
+  private readonly config = loadPerformanceConfig()
 
   // Body parts for animation
   private head: THREE.Group
@@ -566,6 +572,21 @@ export class Claude implements ICharacter {
   }
 
   private update(delta: number): void {
+    const now = performance.now()
+
+    // Performance optimization: throttle idle state updates
+    // When idle, only update every 100ms instead of every frame (60fps)
+    if (this.state === 'idle') {
+      const timeSinceLastUpdate = now - this.lastUpdateTime
+      if (timeSinceLastUpdate < this.IDLE_UPDATE_INTERVAL) {
+        return  // Skip this update cycle
+      }
+      this.lastUpdateTime = now
+    } else {
+      // Walking/Working/Thinking: update every frame
+      this.lastUpdateTime = now
+    }
+
     // Movement
     if (this.targetPosition && this.state === 'walking') {
       const direction = this.targetPosition.clone().sub(this.mesh.position)

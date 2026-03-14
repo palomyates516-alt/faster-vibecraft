@@ -1789,3 +1789,93 @@
 .zone-command-input::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.25);
 }
+
+/* ============================================================================
+   Radio Button Row for Settings Modal
+   ============================================================================ */
+
+.settings-radio-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 4px 0;
+}
+
+.radio-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
+
+.radio-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-secondary);
+  font-size: 12px;
+  user-select: none;
+}
+
+.radio-option:hover {
+  background: var(--bg-secondary);
+  border-color: var(--border-hover);
+}
+
+.radio-option input[type="radio"] {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border-secondary);
+  border-radius: 50%;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+  background: transparent;
+}
+
+.radio-option input[type="radio"]:checked {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary);
+}
+
+.radio-option input[type="radio"]:checked::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 4px;
+  height: 4px;
+  background: white;
+  border-radius: 50%;
+}
+
+.radio-option:has(input:checked) {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: white;
+}
+
+.radio-option span {
+  line-height: 1;
+}
+
+.field-hint {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.hint-strong {
+  font-weight: 600;
+  color: var(--text-secondary);
+}

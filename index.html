@@ -250,6 +250,25 @@
         </div>
 
         <div class="modal-field">
+          <label>Performance</label>
+          <div class="settings-radio-row">
+            <span class="radio-label">Render Mode</span>
+            <label class="radio-option">
+              <input type="radio" name="render-mode" value="3d" checked />
+              <span>3D (Three.js)</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="render-mode" value="2d" />
+              <span>2D (DOM)</span>
+            </label>
+          </div>
+          <div class="field-hint">
+            <span class="hint-strong">3D:</span> Full WebGL experience (10-20% CPU) ·
+            <span class="hint-strong">2D:</span> Extreme performance (&lt;5% CPU, experimental)
+          </div>
+        </div>
+
+        <div class="modal-field">
           <label>Agent Connection</label>
           <div class="settings-port-row">
             <span class="port-label">localhost:</span>

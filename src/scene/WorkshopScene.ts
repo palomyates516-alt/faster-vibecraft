@@ -13,6 +13,7 @@ import { soundManager } from '../audio'
 import { ZoneNotifications, type NotificationOptions } from './ZoneNotifications'
 import { StationPanels } from './StationPanels'
 import { drawMode } from '../ui/DrawMode'
+import { loadPerformanceConfig } from '../config/PerformanceConfig'
 import {
   addBookshelfDetails,
   addTerminalDetails,
@@ -146,6 +147,11 @@ export class WorkshopScene {
   private frameCount = 0
   private lastFpsUpdate = 0
   private fpsElement: HTMLElement | null = null
+
+  // Performance optimization: dirty flag for on-demand rendering
+  private isDirty = true
+  private activeAnimationCount = 0  // Counter instead of iterating zones every frame
+  private performanceConfig = loadPerformanceConfig()
 
   // Click pulse effects (ring expands, hex fades)
   private clickPulses: Array<{
@@ -628,6 +634,13 @@ export class WorkshopScene {
     }
 
     console.log(`Created zone for session ${sessionId.slice(0, 8)} at position`, position)
+
+    // Mark scene as dirty for re-render
+    this.markDirty()
+
+    // Increment active animation counter (zone enters with animation)
+    this.activeAnimationCount++
+
     return zone
   }
 
@@ -741,6 +754,12 @@ export class WorkshopScene {
       ;(zone.sideMesh.material as THREE.MeshStandardMaterial).dispose()
     }
 
+    // Performance: Decrement animation counter if zone had active animation
+    // This prevents counter leakage when zones are removed mid-animation
+    if (zone.animationState !== undefined) {
+      this.activeAnimationCount = Math.max(0, this.activeAnimationCount - 1)
+    }
+
     this.zones.delete(sessionId)
     console.log(`Deleted zone for session ${sessionId.slice(0, 8)}`)
 
@@ -773,6 +792,9 @@ export class WorkshopScene {
     }
 
     this.notifyCameraModeChange()
+
+    // Mark scene as dirty for re-render
+    this.markDirty()
   }
 
   /**
@@ -1907,6 +1929,9 @@ export class WorkshopScene {
     // Update ring to match (overrides attention pulse animation)
     ringMat.color.setHex(colors.ring)
     ringMat.opacity = colors.ringOpacity
+
+    // Mark scene as dirty for re-render
+    this.markDirty()
   }
 
   /**
@@ -1956,6 +1981,9 @@ export class WorkshopScene {
       baseOpacity,
       peakOpacity: Math.min(1, baseOpacity + 0.5),
     })
+
+    // Mark scene as dirty for re-render
+    this.markDirty()
   }
 
   /**
@@ -1994,8 +2022,14 @@ export class WorkshopScene {
 
   /**
    * Emit particles from a zone
+   * PERFORMANCE: Controlled by PerformanceConfig.enableZoneParticles
    */
   private emitParticles(zone: Zone): void {
+    // Performance optimization: skip if zone particles disabled
+    if (!this.performanceConfig.enableZoneParticles) {
+      return
+    }
+
     const positions = zone.particles.geometry.attributes.position.array as Float32Array
     const velocities = zone.particleVelocities
 
@@ -2022,8 +2056,14 @@ export class WorkshopScene {
 
   /**
    * Create ambient floating particles for atmosphere
+   * PERFORMANCE: Controlled by PerformanceConfig.enableAmbientParticles
    */
   private createAmbientParticles(): void {
+    // Performance optimization: check if ambient particles are enabled
+    if (!this.performanceConfig.enableAmbientParticles) {
+      return
+    }
+
     const particleCount = 60
     const positions = new Float32Array(particleCount * 3)
 
@@ -2065,9 +2105,11 @@ export class WorkshopScene {
 
   /**
    * Update ambient particles - gentle floating motion
+   * PERFORMANCE: Only runs if particles are enabled
    */
   private updateAmbientParticles(delta: number): void {
-    if (!this.ambientParticles) return
+    // Performance optimization: skip if particles disabled or not created
+    if (!this.performanceConfig.enableAmbientParticles || !this.ambientParticles) return
 
     const positions = this.ambientParticles.geometry.attributes.position.array as Float32Array
 
@@ -2272,8 +2314,15 @@ export class WorkshopScene {
    *
    * Uses merged geometry (single BufferGeometry with LineSegments)
    * for optimal performance - allows many more hexes with one draw call
+   *
+   * PERFORMANCE: Controlled by PerformanceConfig.worldGrid
    */
   private createWorldHexGrid(): void {
+    // Performance optimization: check config via PerformanceConfig
+    if (!this.performanceConfig.worldGrid) {
+      return
+    }
+
     const hexRadius = this.hexGrid.hexRadius
     const gridRange = this.gridRange
 
@@ -2363,9 +2412,13 @@ export class WorkshopScene {
     const animate = () => {
       this.animationId = requestAnimationFrame(animate)
 
+      // Save dirty state at start of frame
+      // Don't reset yet - allow markDirty() calls during this frame to take effect
+      const wasDirty = this.isDirty
+
       const delta = this.clock.getDelta()
 
-      // FPS counter
+      // FPS counter (only update when rendering)
       this.frameCount++
       const now = performance.now()
       if (now - this.lastFpsUpdate >= 1000) {
@@ -2393,19 +2446,28 @@ export class WorkshopScene {
         }
       }
 
-      // Update controls
-      this.controls.update()
+      // Update controls (only when needed)
+      if (this.shouldRender()) {
+        this.controls.update()
+      }
 
       // Update time accumulator
       this.time += delta
+
+      // Update ambient particles (only if enabled)
+      if (this.performanceConfig.enableAmbientParticles) {
+        this.updateAmbientParticles(delta)
+      }
 
       // Call render callbacks
       for (const callback of this.onRenderCallbacks) {
         callback(delta)
       }
 
-      // Update ambient floating particles
-      this.updateAmbientParticles(delta)
+      // Update ambient floating particles (only when enabled and rendering)
+      if (this.performanceConfig.enableAmbientParticles && this.shouldRender()) {
+        this.updateAmbientParticles(delta)
+      }
 
       // Update zone pulse effects and particles
       const zonesToFinalize: string[] = []
@@ -2444,6 +2506,7 @@ export class WorkshopScene {
           if (t >= 1) {
             zone.animationState = undefined
             zone.animationProgress = undefined
+            this.activeAnimationCount--  // Decrement when entering animation finishes
           }
         } else if (zone.animationState === 'exiting') {
           zone.animationProgress = Math.min(1, (zone.animationProgress ?? 0) + delta * 2.5) // 0.4 second animation
@@ -2474,6 +2537,7 @@ export class WorkshopScene {
 
           // Animation complete - mark for removal
           if (t >= 1) {
+            this.activeAnimationCount--  // Decrement before removal
             zonesToFinalize.push(zone.id)
           }
         }
@@ -2564,11 +2628,33 @@ export class WorkshopScene {
       // Update station panels
       this.stationPanels.update()
 
-      // Render
-      this.renderer.render(this.scene, this.camera)
+      // Performance optimization: only render when dirty or during animations
+      if (wasDirty || this.shouldRender()) {
+        this.renderer.render(this.scene, this.camera)
+      }
+
+      // Reset dirty flag at end of frame after rendering
+      // This allows markDirty() calls during rendering to take effect immediately
+      this.isDirty = false
     }
 
     animate()
+  }
+
+  /**
+   * Mark the scene as needing re-render
+   * Call this whenever the scene changes visually
+   */
+  public markDirty(): void {
+    this.isDirty = true
+  }
+
+  /**
+   * Check if rendering is needed (combines dirty flag and active animations)
+   * More efficient than checking hasActiveAnimations separately
+   */
+  private shouldRender(): boolean {
+    return this.isDirty || this.activeAnimationCount > 0 || this.cameraAnimating
   }
 
   stop(): void {
@@ -2706,6 +2792,9 @@ export class WorkshopScene {
       station.contextSprite.position.set(0, 2.5, 0)
       station.mesh.add(station.contextSprite)
     }
+
+    // Mark scene as dirty for re-render
+    this.markDirty()
   }
 
   /**
@@ -2726,6 +2815,9 @@ export class WorkshopScene {
         }
       }
     }
+
+    // Mark scene as dirty for re-render
+    this.markDirty()
   }
 
   private getStationColor(type: StationType): string {
@@ -3334,6 +3426,9 @@ export class WorkshopScene {
     this.updateZoneEdgeLines(zone)
     this.updateZoneSideMesh(zone)
     this.notifyZoneElevationChange(sessionId, elevation)
+
+    // Mark scene as dirty for re-render
+    this.markDirty()
   }
 
   /**

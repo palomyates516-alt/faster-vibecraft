@@ -1,4 +1,4 @@
-# @palomyates516-alt/vibecraft
+# faster-vibecraft
 
 ![Vibecraft Screenshot](public/og-image.png)
 
@@ -18,7 +18,7 @@ Manage Claude Code in style with **70% better performance**!
 
 Vibecraft uses your own local Claude Code instances — no files or prompts are shared.
 
-![Three.js](https://img.shields.io/badge/Three.js-black?logo=threedotjs) ![TypeScript](https://img.shields.io/badge/TypeScript-blue?logo=typescript&logoColor=white) ![npm](https://img.shields.io/npm/v/@palomyates516-alt/vibecraft)
+![Three.js](https://img.shields.io/badge/Three.js-black?logo=threedotjs) ![TypeScript](https://img.shields.io/badge/TypeScript-blue?logo=typescript&logoColor=white) ![npm](https://img.shields.io/npm/v/faster-vibecraft)
 
 ## Requirements
 
@@ -37,10 +37,10 @@ brew install jq tmux       # macOS
 # sudo apt install jq tmux  # Ubuntu/Debian
 
 # 2. Configure hooks (one time)
-npx @palomyates516-alt/vibecraft setup
+npx faster-vibecraft setup
 
 # 3. Start server
-npx @palomyates516-alt/vibecraft
+npx faster-vibecraft
 ```
 
 ### Using the original version:
@@ -58,7 +58,7 @@ cd vibecraft && npm install && npm run dev
 # Opens on http://localhost:4002
 ```
 
-**To uninstall:** `npx @palomyates516-alt/vibecraft uninstall` (removes hooks, keeps your data)
+**To uninstall:** `npx faster-vibecraft uninstall` (removes hooks, keeps your data)
 
 ## Browser Control (Optional)
 
@@ -156,7 +156,7 @@ See [docs/ORCHESTRATION.md](docs/ORCHESTRATION.md) for the full API and architec
 ## CLI Options
 
 ```bash
-@palomyates516-alt/vibecraft [options]
+faster-vibecraft [options]
 
 Options:
   --port, -p <port>    WebSocket server port (default: 4003)
@@ -168,7 +168,7 @@ Options:
 
 ### From npm (recommended):
 ```bash
-npm install -g @palomyates516-alt/vibecraft
+npm install -g faster-vibecraft
 ```
 
 ### From source:

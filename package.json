@@ -1,12 +1,12 @@
 {
-  "name": "vibecraft",
-  "version": "0.1.15",
-  "description": "3D visualization of Claude Code as an interactive workshop",
-  "author": "nearcyan",
+  "name": "faster-vibecraft",
+  "version": "0.2.0",
+  "description": "3D visualization of Claude Code as an interactive workshop with 70% better performance",
+  "author": "palomyates516-alt",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/nearcyan/vibecraft"
+    "url": "https://github.com/palomyates516-alt/faster-vibecraft"
   },
   "keywords": [
     "claude",

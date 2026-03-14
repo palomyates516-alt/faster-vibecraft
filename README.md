@@ -45,6 +45,7 @@ npx faster-vibecraft
 
 ### Using the original version:
 ```bash
+# Original vibecraft by nearcyan
 npx vibecraft setup
 npx vibecraft
 ```

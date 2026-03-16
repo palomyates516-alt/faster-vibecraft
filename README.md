@@ -4,6 +4,8 @@
 
 Manage Claude Code in style with **70% better performance**!
 
+**[中文文档](README_CN.md)**
+
 **[Try it instantly at vibecraft.sh](https://vibecraft.sh)** — still connects to your local Claude Code instances!
 
 **✨ Phase 3 Performance Optimization:**
@@ -163,6 +165,11 @@ Options:
   --port, -p <port>    WebSocket server port (default: 4003)
   --help, -h           Show help
   --version, -v        Show version
+
+Commands:
+  setup                Configure Claude Code hooks automatically
+  uninstall            Remove faster-vibecraft hooks (keeps your data)
+  doctor               Diagnose common issues
 ```
 
 ## Installation

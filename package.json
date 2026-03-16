@@ -1,6 +1,6 @@
 {
   "name": "faster-vibecraft",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "3D visualization of Claude Code as an interactive workshop with 70% better performance",
   "author": "palomyates516-alt",
   "license": "MIT",
@@ -19,7 +19,7 @@
   ],
   "type": "module",
   "bin": {
-    "vibecraft": "./bin/cli.js"
+    "faster-vibecraft": "./bin/cli.js"
   },
   "files": [
     "bin/",

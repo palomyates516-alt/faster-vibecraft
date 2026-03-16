@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
 /**
- * Vibeshop CLI - 3D visualization for Claude Code
+ * Faster-Vibecraft CLI - 3D visualization for Claude Code (optimized)
  *
  * Usage:
- *   npx vibecraft          # Start the server
- *   npx vibecraft --help   # Show help
+ *   npx faster-vibecraft          # Start the server
+ *   npx faster-vibecraft --help   # Show help
  */
 
 // Check if cwd exists (common issue when running from deleted directory)
@@ -16,7 +16,7 @@ try {
   console.error('This happens when the directory you ran the command from was deleted.')
   console.error('\nFix: cd to a valid directory first:')
   console.error('  cd ~')
-  console.error('  npx vibecraft setup')
+  console.error('  npx faster-vibecraft setup')
   process.exit(1)
 }
 
@@ -95,7 +95,7 @@ function printHealthCheck() {
 
   if (!hooksResult.configured) {
     warnings.push(`  [!] Hooks not configured - events won't be captured
-      Run: npx vibecraft setup
+      Run: npx faster-vibecraft setup
       Then restart Claude Code`)
   }
 
@@ -111,13 +111,13 @@ const args = process.argv.slice(2)
 
 if (args.includes('--help') || args.includes('-h')) {
   console.log(`
-vibecraft - 3D visualization for Claude Code
+faster-vibecraft - 3D visualization for Claude Code (optimized)
 
 Usage:
-  vibecraft [options]
-  vibecraft setup         Configure Claude Code hooks automatically
-  vibecraft uninstall     Remove vibecraft hooks (keeps your data)
-  vibecraft doctor        Diagnose common issues
+  faster-vibecraft [options]
+  faster-vibecraft setup         Configure Claude Code hooks automatically
+  faster-vibecraft uninstall     Remove faster-vibecraft hooks (keeps your data)
+  faster-vibecraft doctor        Diagnose common issues
 
 Options:
   --port, -p <port>    WebSocket server port (default: 4003)
@@ -130,12 +130,13 @@ Environment Variables:
   VIBECRAFT_DEBUG      Enable debug logging (true/false)
 
 Setup:
-  1. Run: vibecraft setup
-  2. Start server: vibecraft
+  1. Run: faster-vibecraft setup
+  2. Start server: faster-vibecraft
   3. Open frontend in browser
 
 Website: https://vibecraft.sh
-GitHub:  https://github.com/nearcyan/vibecraft
+GitHub:  https://github.com/palomyates516-alt/faster-vibecraft
+Original: https://github.com/nearcyan/vibecraft
 `)
   process.exit(0)
 }
@@ -150,7 +151,7 @@ if (args.includes('--hook-path')) {
 if (args[0] === 'setup') {
   const { writeFileSync, copyFileSync, chmodSync } = await import('fs')
 
-  console.log('Setting up vibecraft hooks...\n')
+  console.log('Setting up faster-vibecraft hooks...\n')
 
   // ==========================================================================
   // Step 1: Find Claude Code settings
@@ -264,6 +265,7 @@ if (args[0] === 'setup') {
   const addHook = (eventType, entry) => {
     settings.hooks[eventType] = settings.hooks[eventType] || []
     // Remove any existing vibecraft hooks (from any location)
+    // This handles both original vibecraft and faster-vibecraft
     settings.hooks[eventType] = settings.hooks[eventType].filter(h =>
       !h.hooks?.some(hh => hh.command?.includes('vibecraft-hook'))
     )
@@ -339,14 +341,14 @@ if (args[0] === 'setup') {
   if (serverRunning) {
     // Update scenario
     console.log('\nTo complete the update:')
-    console.log('  1. Restart vibecraft server (Ctrl+C, then run: npx vibecraft)')
+    console.log('  1. Restart faster-vibecraft server (Ctrl+C, then run: npx faster-vibecraft)')
     console.log('  2. Restart Claude Code (for hook changes to take effect)')
     console.log('  3. Refresh browser\n')
   } else {
     // Fresh install scenario
     console.log('\nNext steps:')
     console.log('  1. Restart Claude Code (required for hooks to take effect)')
-    console.log('  2. Run: npx vibecraft')
+    console.log('  2. Run: npx faster-vibecraft')
     console.log('  3. Open http://localhost:4003 in your browser\n')
   }
 
@@ -357,7 +359,7 @@ if (args[0] === 'setup') {
 if (args[0] === 'uninstall') {
   const { writeFileSync, rmSync } = await import('fs')
 
-  console.log('Uninstalling vibecraft hooks...\n')
+  console.log('Uninstalling faster-vibecraft hooks...\n')
 
   // ==========================================================================
   // Step 1: Find Claude Code settings
@@ -487,7 +489,7 @@ if (args[0] === 'uninstall') {
 // Doctor command - diagnose common issues
 if (args[0] === 'doctor') {
   console.log('='.repeat(50))
-  console.log('Vibecraft Doctor - Diagnosing your setup...')
+  console.log('Faster-Vibecraft Doctor - Diagnosing your setup...')
   console.log('='.repeat(50))
   console.log()
 
@@ -564,7 +566,7 @@ if (args[0] === 'doctor') {
     }
   } else {
     console.log(`  ✗ Hook script not found: ${hookScript}`)
-    issues.push('Hook script not installed. Run: npx vibecraft setup')
+    issues.push('Hook script not installed. Run: npx faster-vibecraft setup')
   }
 
   // -------------------------------------------------------------------------
@@ -587,7 +589,7 @@ if (args[0] === 'doctor') {
 
   if (!settingsPath) {
     console.log('  ✗ No Claude settings file found')
-    issues.push('Claude settings not found. Run: npx vibecraft setup')
+    issues.push('Claude settings not found. Run: npx faster-vibecraft setup')
   } else {
     console.log(`  ✓ Settings file: ${settingsPath}`)
 
@@ -619,8 +621,8 @@ if (args[0] === 'doctor') {
         console.log(`    Missing: ${missingHooks.join(', ')}`)
         warnings.push(`Some hooks not configured: ${missingHooks.join(', ')}`)
       } else {
-        console.log('  ✗ No vibecraft hooks configured')
-        issues.push('Hooks not configured. Run: npx vibecraft setup')
+        console.log('  ✗ No faster-vibecraft hooks configured')
+        issues.push('Hooks not configured. Run: npx faster-vibecraft setup')
       }
     } catch (e) {
       console.log(`  ✗ Failed to parse settings: ${e.message}`)
@@ -661,7 +663,7 @@ if (args[0] === 'doctor') {
     }
   } else {
     console.log(`  ✗ Data directory not found: ${dataDir}`)
-    issues.push('Data directory not created. Run: npx vibecraft setup')
+    issues.push('Data directory not created. Run: npx faster-vibecraft setup')
   }
 
   // -------------------------------------------------------------------------
@@ -683,7 +685,7 @@ if (args[0] === 'doctor') {
     }
   } catch {
     console.log('  ⚠ Server not running on port 4003')
-    warnings.push('Server not running. Start with: npx vibecraft')
+    warnings.push('Server not running. Start with: npx faster-vibecraft')
   }
 
   // -------------------------------------------------------------------------
@@ -743,7 +745,7 @@ if (args[0] === 'doctor') {
 
 if (args.includes('--version') || args.includes('-v')) {
   const pkg = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf-8'))
-  console.log(`vibecraft v${pkg.version}`)
+  console.log(`faster-vibecraft v${pkg.version}`)
   process.exit(0)
 }
 
@@ -764,8 +766,9 @@ if (!existsSync(dataDir)) {
 console.log(`
   ╭─────────────────────────────────────╮
   │                                     │
-  │   vibecraft                          │
+  │   faster-vibecraft                  │
   │   3D visualization for Claude Code  │
+  │   (optimized version)               │
   │                                     │
   ╰─────────────────────────────────────╯
 `)
